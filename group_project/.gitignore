@@ -105,3 +105,5 @@ linux/cmake-build-*/
 *.tmp
 *.lock
 *.DS_Store
+/linux/
+/macos/
