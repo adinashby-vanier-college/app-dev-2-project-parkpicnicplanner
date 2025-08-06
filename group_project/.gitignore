@@ -107,3 +107,6 @@ linux/cmake-build-*/
 *.DS_Store
 /linux/
 /macos/
+/windows/
+/web/
+/ios/
