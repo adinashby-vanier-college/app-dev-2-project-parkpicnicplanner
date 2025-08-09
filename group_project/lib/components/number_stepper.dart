@@ -2,12 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class NumberStepper extends StatefulWidget {
-  final int initialValue;
-  final int? minValue;
-  final int? maxValue;
-  final bool negativeAllowed;
-  final Function fetchValueCallback;
-
   const NumberStepper({
     super.key,
     this.initialValue = 0,
@@ -16,6 +10,12 @@ class NumberStepper extends StatefulWidget {
     this.minValue,
     required this.fetchValueCallback
   });
+
+  final int initialValue;
+  final int? minValue;
+  final int? maxValue;
+  final bool negativeAllowed;
+  final Function fetchValueCallback;
 
   @override
   State<NumberStepper> createState() => _NumberStepperState();
