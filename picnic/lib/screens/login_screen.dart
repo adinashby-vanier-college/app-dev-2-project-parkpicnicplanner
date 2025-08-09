@@ -14,6 +14,10 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _loading = false;
   String? _error;
 
+  // Hardcoded admin credentials
+  static const String _adminEmail = "admin";
+  static const String _adminPassword = "admin";
+
   Future<void> _signIn() async {
     setState(() {
       _loading = true;
@@ -21,9 +25,20 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      final email = _emailController.text.trim();
+      final password = _passwordController.text.trim();
+
+      // Check for hardcoded admin credentials
+      if (email == _adminEmail && password == _adminPassword) {
+        // Bypass Firebase auth and navigate to admin home
+        Navigator.pushReplacementNamed(context, '/home');
+        return;
+      }
+
+      // Regular user authentication
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+        email: email,
+        password: password,
       );
       Navigator.pushReplacementNamed(context, '/home');
     } on FirebaseAuthException catch (e) {
@@ -89,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/register');
+                    Navigator.pushNamed(context, '/register_screen');
                   },
                   child: const Text('Register'),
                 ),
