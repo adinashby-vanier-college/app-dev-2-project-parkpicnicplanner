@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "268015225293",
+    "project_id": "parkpicnicplanner",
+    "storage_bucket": "parkpicnicplanner.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:268015225293:android:93917c99fc1424ca2a5c84",
+        "android_client_info": {
+          "package_name": "com.example.picnic"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNwQWBfjBkdrqKG8ToUZ8BOIkEdmqE0HQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:268015225293:android:dc40e4bc405565362a5c84",
+        "android_client_info": {
+          "package_name": "com.vanier.parkpicnicplanner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNwQWBfjBkdrqKG8ToUZ8BOIkEdmqE0HQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
