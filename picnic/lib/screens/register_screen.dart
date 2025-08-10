@@ -54,7 +54,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     //Configure Validator for Email
     _emailValidator = PicnicFormValidators.email();
 
-
     //Configure Validator for Password Minimum
     passwordMinimumValidator = PicnicFormValidators.custom((value) {
       String initialPassword = _passwordInitialController.text;
@@ -114,8 +113,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // }
   }
 
-  void checkForm(){
-    bool formIsValid = (_firstNameValidator?.call(_firstNameController.text) == null);
+  void checkForm() {
+    bool formIsValid =
+        (_firstNameValidator?.call(_firstNameController.text) == null);
     formIsValid &= (_lastNameValidator?.call(_lastNameController.text) == null);
     formIsValid &= (_emailValidator?.call(_emailController.text) == null);
     formIsValid &= (passwordMinimumValidator?.call(null) == null);
@@ -124,7 +124,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() {
       _formValid = formIsValid;
     });
-
   }
 
   @override
@@ -139,78 +138,112 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: Form(
           key: _formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            spacing: 20,
             children: [
-              Text(
-                "Register",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              if (_error != null)
-                Text(_error!, style: const TextStyle(color: Colors.red)),
-              TextFormField(
-                controller: _firstNameController,
-                decoration: const InputDecoration(
-                  labelText: 'First Name',
-                  border: OutlineInputBorder(),
-                ),
-                autovalidateMode: AutovalidateMode.onUnfocus,
-                validator: PicnicFormValidators.composite([_firstNameValidator, validateForm]),
-              ),
-              TextFormField(
-                controller: _lastNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Last Name',
-                  border: OutlineInputBorder(),
-                ),
-                autovalidateMode: AutovalidateMode.onUnfocus,
-                validator: PicnicFormValidators.composite([_lastNameValidator, validateForm]),
-              ),
-              TextFormField(
-                controller: _emailController,
-                obscureText: false,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                ),
-                autovalidateMode: AutovalidateMode.onUnfocus,
-                validator: PicnicFormValidators.composite([_emailValidator,validateForm]),
-              ),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(15),
-                  border: Border.all(color: Colors.white),
-                  borderRadius: BorderRadius.all(Radius.circular(6)),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(20, 30, 20, 30),
+              Expanded(
+                child: SingleChildScrollView(
                   child: Column(
-                    spacing: 20,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.max,
+                    spacing: 15,
                     children: [
+                      Text(
+                        "Register",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (_error != null)
+                        Text(
+                          _error!,
+                          style: const TextStyle(color: Colors.red),
+                        ),
                       TextFormField(
-                        controller: _passwordInitialController,
-                        obscureText: true,
+                        controller: _firstNameController,
                         decoration: const InputDecoration(
-                          labelText: 'Password',
+                          labelText: 'First Name',
                           border: OutlineInputBorder(),
-                          fillColor: Colors.white,
-                          filled: true,
+                          helperText: ' ',
                         ),
                         autovalidateMode: AutovalidateMode.onUnfocus,
-                        validator: PicnicFormValidators.composite([passwordMinimumValidator,validateForm]),
+                        validator: PicnicFormValidators.composite([
+                          _firstNameValidator,
+                          validateForm,
+                        ]),
                       ),
                       TextFormField(
-                        controller: _passwordConfirmController,
-                        obscureText: true,
+                        controller: _lastNameController,
                         decoration: const InputDecoration(
-                          labelText: 'Confirm Password',
+                          labelText: 'Last Name',
                           border: OutlineInputBorder(),
-                          fillColor: Colors.white,
-                          filled: true,
+                          helperText: ' ',
                         ),
                         autovalidateMode: AutovalidateMode.onUnfocus,
-                        validator: PicnicFormValidators.composite([passwordMatchesValidator, validateForm]),
+                        validator: PicnicFormValidators.composite([
+                          _lastNameValidator,
+                          validateForm,
+                        ]),
+                      ),
+                      TextFormField(
+                        controller: _emailController,
+                        obscureText: false,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          border: OutlineInputBorder(),
+                          helperText: ' ',
+                        ),
+                        autovalidateMode: AutovalidateMode.onUnfocus,
+                        validator: PicnicFormValidators.composite([
+                          _emailValidator,
+                          validateForm,
+                        ]),
+                      ),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withAlpha(15),
+                          border: Border.all(color: Colors.white),
+                          borderRadius: BorderRadius.all(Radius.circular(6)),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(20, 30, 20, 10),
+                          child: Column(
+                            spacing: 20,
+                            children: [
+                              TextFormField(
+                                controller: _passwordInitialController,
+                                obscureText: true,
+                                decoration: const InputDecoration(
+                                  labelText: 'Password',
+                                  border: OutlineInputBorder(),
+                                  fillColor: Colors.white,
+                                  filled: true,
+                                  helperText: ' ',
+                                ),
+                                autovalidateMode: AutovalidateMode.onUnfocus,
+                                validator: PicnicFormValidators.composite([
+                                  passwordMinimumValidator,
+                                  validateForm,
+                                ]),
+                              ),
+                              TextFormField(
+                                controller: _passwordConfirmController,
+                                obscureText: true,
+                                decoration: const InputDecoration(
+                                  labelText: 'Confirm Password',
+                                  border: OutlineInputBorder(),
+                                  fillColor: Colors.white,
+                                  filled: true,
+                                  helperText: ' ',
+                                ),
+                                autovalidateMode: AutovalidateMode.onUnfocus,
+                                validator: PicnicFormValidators.composite([
+                                  passwordMatchesValidator,
+                                  validateForm,
+                                ]),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -220,18 +253,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Container(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: (_formValid ? (){
-                    _formKey.currentState!.validate();
+                  onPressed: (_formValid
+                      ? () {
+                          _formKey.currentState!.validate();
 
-                    if (_formValid) {
-                      _register();
-                    }
-                  } : null ),
+                          if (_formValid) {
+                            _register();
+                          }
+                        }
+                      : null),
                   child: _loading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text('Register'),
                 ),
               ),
+              const SizedBox(height:20)
             ],
           ),
         ),
