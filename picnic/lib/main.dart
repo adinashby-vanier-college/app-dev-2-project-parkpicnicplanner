@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+
 import 'package:picnic/screens/register_screen.dart';
+import 'config/firebase_options.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/event_detail_screen.dart';
@@ -7,7 +10,14 @@ import 'screens/all_parks_screen.dart';
 import 'screens/profile_screen.dart';
 import 'models/user.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // await Firebase.initializeApp(
+  //   name: "Park Picnic Planner",
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
+
   runApp(const ParkPicnicPlannerApp());
 }
 
@@ -18,6 +28,7 @@ class ParkPicnicPlannerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Park Picnic Planner',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.green,
         visualDensity: VisualDensity.adaptivePlatformDensity,
