@@ -60,9 +60,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 CircleAvatar(
                   radius: 60,
-                  backgroundImage: _currentUser.profileImageUrl != null
-                      ? NetworkImage(_currentUser.profileImageUrl!)
-                      : const AssetImage('assets/default_profile.png') as ImageProvider,
+                  backgroundColor: Colors.grey[200],
+                  child: ClipOval(
+                    child: _currentUser.profileImageUrl != null
+                        ? Image.network(
+                      _currentUser.profileImageUrl!,
+                      width: 120,  // Match the diameter (radius * 2)
+                      height: 120,
+                      fit: BoxFit.cover,  // This ensures proportional resizing
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                                : null,
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.person, size: 60),
+                    )
+                        : const Icon(Icons.person, size: 60),
+                  ),
                 ),
                 if (_isEditing)
                   FloatingActionButton.small(
