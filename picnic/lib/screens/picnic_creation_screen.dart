@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:picnic/components/date_time_selector.dart';
 
 class PicnicCreationScreen extends StatefulWidget {
   const PicnicCreationScreen({super.key});
@@ -8,6 +9,26 @@ class PicnicCreationScreen extends StatefulWidget {
 }
 
 class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
+  ValueNotifier<bool> _isFixedSchedule = ValueNotifier<bool>(true);
+  final GlobalKey _dateTimeSelectorKey = GlobalKey();
+
+  String _scheduleType = "fixed";
+
+  @override
+  void initState() {
+    _isFixedSchedule.addListener(() {
+      setState(() {
+        if (_isFixedSchedule.value) {
+          _scheduleType = "fixed";
+        } else {
+          _scheduleType = "poll";
+        }
+      });
+    });
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -17,10 +38,9 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
         body: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
-            Flexible(
-              flex: 3,
+            Container(
               child: Column(
-                mainAxisSize: MainAxisSize.max,
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Placeholder(
@@ -68,13 +88,12 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
                 ],
               ),
             ),
-            Flexible(
-              flex: 7,
+            Expanded(
               child: Padding(
                 padding: EdgeInsets.all(16),
                 child: TabBarView(
                   children: [
-                    Text("SCHEDULE PANE"),
+                    _buildSchedulePane(),
                     _buildDescriptionPane(),
                     Text("LOCATION"),
                   ],
@@ -87,6 +106,61 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
     );
   }
 
+  Widget _buildSchedulePane() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: ListView(
+            children: [
+              SwitchListTile(
+                title: Text('Schedule - $_scheduleType'),
+                value: _isFixedSchedule.value,
+                onChanged: (value) {
+                  setState(() {
+                    _isFixedSchedule.value = value;
+                  });
+                },
+              ),
+              SizedBox(height: 10),
+              AnimatedSwitcher(
+                duration: Duration(milliseconds: 350),
+                child: (_isFixedSchedule.value)
+                    ? Container(
+                        key: ValueKey('fixed'),
+                        child: _buildFixedSchedule(),
+                      )
+                    : Container(
+                        key: ValueKey('poll'),
+                        child: _buildSchedulePoll(),
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFixedSchedule() {
+    return Column(
+      children: [
+        Text(
+          'Select Date and Time',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 10),
+        DateTimeSelector(key: _dateTimeSelectorKey),
+      ],
+    );
+  }
+
+  Widget _buildSchedulePoll() {
+    return Text("Poll");
+  }
+
   Widget _buildDescriptionPane() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,6 +170,7 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
           overflow: TextOverflow.fade,
           style: TextStyle(fontSize: 18),
         ),
+        SizedBox(height: 10),
         Expanded(
           child: TextField(
             expands: true,
@@ -109,6 +184,7 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
             ),
           ),
         ),
+        SizedBox(height: 20),
       ],
     );
   }
