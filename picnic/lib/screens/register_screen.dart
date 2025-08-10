@@ -64,7 +64,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if ((initialPassword == null) ||
           initialPassword.isEmpty ||
           (initialPassword.length < widget.passwordMinLength)) {
-        return "Password much be longer than ${widget.passwordMinLength} characters";
+        return "Password must be longer than ${widget.passwordMinLength} characters";
       }
 
       return null;
