@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:picnic/screens/register_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/event_detail_screen.dart';
@@ -28,6 +29,7 @@ class ParkPicnicPlannerApp extends StatelessWidget {
         '/event': (context) => EventDetailScreen(attendees: demoAttendees),
         '/parks': (context) => const AllParksScreen(),
         '/profile': (context) => ProfileScreen(user: currentUser),
+        '/register': (context) => const RegisterScreen(),
       },
     );
   }

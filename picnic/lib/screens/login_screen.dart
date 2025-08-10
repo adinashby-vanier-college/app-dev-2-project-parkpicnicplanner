@@ -104,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/register_screen');
+                    Navigator.pushNamed(context, '/register');
                   },
                   child: const Text('Register'),
                 ),
