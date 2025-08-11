@@ -5,9 +5,10 @@ import 'package:picnic/screens/chat_detail_screen.dart';
 import 'number_stepper.dart';
 
 class ChatListItem extends StatefulWidget {
-  final int initialUnread;
+  ChatListItem({super.key, required this.topic, this.initialUnread = 0});
 
-  const ChatListItem({super.key, this.initialUnread = 0});
+  final String topic;
+  final int initialUnread;
 
   @override
   State<ChatListItem> createState() => _ChatListItemState();
@@ -41,7 +42,7 @@ class _ChatListItemState extends State<ChatListItem> {
         size: 24.0,
         color: Colors.blueGrey.withAlpha(100),
       ),
-      title: Text("Topic for Chat"),
+      title: Text(widget.topic),
       trailing:
           (_unreadMessages <= 0)
               ? null
