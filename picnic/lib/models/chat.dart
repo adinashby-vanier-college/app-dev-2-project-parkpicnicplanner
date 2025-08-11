@@ -24,7 +24,7 @@ class Chat {
     final String? picnicId =
         data?['picnic_id'] ?? "test"; //TODO: Remove in later testing
     final DocumentReference? messagesRef =
-        data?['chat_messages'] ?? Valid.required(errors, 'topic');
+        data?['chat_messages'] ?? Valid.required(errors, 'chat_messages');
 
     if (errors.isNotEmpty) {
       throw DocumentFormatException("Missing required fields");
