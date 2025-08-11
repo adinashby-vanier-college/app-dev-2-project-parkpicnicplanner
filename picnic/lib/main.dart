@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:picnic/screens/picnic_chats_screen.dart';
 
 import 'package:picnic/screens/register_screen.dart';
 import 'config/firebase_options.dart';
@@ -13,10 +15,12 @@ import 'models/user.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // await Firebase.initializeApp(
-  //   name: "Park Picnic Planner",
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
+  await Firebase.initializeApp(
+    name: "Park Picnic Planner",
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  await auth.FirebaseAuth.instance.signInAnonymously();
 
   runApp(const ParkPicnicPlannerApp());
 }
@@ -33,7 +37,7 @@ class ParkPicnicPlannerApp extends StatelessWidget {
         primarySwatch: Colors.green,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      initialRoute: '/login',
+      initialRoute: '/debug',
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => HomeScreen(user: currentUser),
@@ -41,6 +45,7 @@ class ParkPicnicPlannerApp extends StatelessWidget {
         '/parks': (context) => const AllParksScreen(),
         '/profile': (context) => ProfileScreen(user: currentUser),
         '/register': (context) => const RegisterScreen(),
+        '/debug': (context) => const PicnicChatsScreen()
       },
     );
   }

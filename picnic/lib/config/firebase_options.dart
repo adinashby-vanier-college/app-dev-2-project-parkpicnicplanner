@@ -17,11 +17,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     //TODO: CONFIGURE WITH APPROPRIATE SETTING INFORMATION
-    apiKey: '',
-    appId: '',
-    messagingSenderId: '',
-    projectId: '',
-    storageBucket: '',
+    apiKey: 'AIzaSyDNwQWBfjBkdrqKG8ToUZ8BOIkEdmqE0HQ',
+    appId: '1:268015225293:android:93917c99fc1424ca2a5c84',
+    messagingSenderId: '268015225293',
+    projectId: 'parkpicnicplanner',
+    storageBucket: 'parkpicnicplanner.firebasestorage.app',
   );
 
 }
