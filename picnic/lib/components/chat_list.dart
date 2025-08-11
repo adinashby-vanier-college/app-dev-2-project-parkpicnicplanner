@@ -3,10 +3,14 @@ import 'package:picnic/components/chat_list_item.dart';
 import 'package:picnic/components/requested_items_list_items.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../exceptions/document_format_exception.dart';
+import '../models/chat.dart';
+
 final _firestore = FirebaseFirestore.instance;
 
 class ChatList extends StatefulWidget {
-  const ChatList({super.key});
+  const ChatList({super.key, required this.picnicId});
+  final String picnicId;
 
   @override
   State<ChatList> createState() => _ChatListState();
@@ -15,7 +19,7 @@ class ChatList extends StatefulWidget {
 class _ChatListState extends State<ChatList> {
   Widget _fetchChats(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('chats').snapshots(),
+      stream: _firestore.collection('chats').where("picnic_id", isEqualTo: widget.picnicId).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Center(
@@ -24,18 +28,23 @@ class _ChatListState extends State<ChatList> {
             ),
           );
         }
+
         final chats = snapshot.data!.docs;
 
         List<Widget> chatListItems = [];
         for (var chat in chats) {
-          print('Document data: ${chat.data()}');
+          final data = chat.data() as Map<String, dynamic>?;
 
-          final chatTopic = chat['topic'];
-          final picnicId = chat['picnic_id'];
+          try {
+            final listItem = ChatListItem(model: Chat.fromFirestore(data));
+            chatListItems.add(listItem);
+          } on DocumentFormatException catch( e) {
+            print(e);
+            print('Document data: ${data}');
+          }
 
-          final listItem = ChatListItem(topic: chatTopic);
-          chatListItems.add(listItem);
         }
+
         return ListView(
           padding: EdgeInsets.all(8),
           children: chatListItems,

@@ -32,7 +32,7 @@ class _PicnicChatsScreenState extends State<PicnicChatsScreen> {
         ),
         body: TabBarView(
           children: [
-            ChatList(),
+            ChatList(picnicId:"test"),
             Container(),
           ],
         ),

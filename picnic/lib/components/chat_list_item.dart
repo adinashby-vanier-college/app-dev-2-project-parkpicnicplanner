@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:picnic/mixins/overlay_mixin.dart';
 import 'package:picnic/screens/chat_detail_screen.dart';
 
-import 'number_stepper.dart';
+import '../models/chat.dart';
 
 class ChatListItem extends StatefulWidget {
-  ChatListItem({super.key, required this.topic, this.initialUnread = 0});
+  ChatListItem({
+    super.key,
+    required this.model,
+    this.initialUnread = 0
+  });
 
-  final String topic;
+  final Chat model;
   final int initialUnread;
 
   @override
@@ -42,7 +45,7 @@ class _ChatListItemState extends State<ChatListItem> {
         size: 24.0,
         color: Colors.blueGrey.withAlpha(100),
       ),
-      title: Text(widget.topic),
+      title: Text(widget.model.topic),
       trailing:
           (_unreadMessages <= 0)
               ? null
