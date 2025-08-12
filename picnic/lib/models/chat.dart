@@ -7,17 +7,19 @@ typedef Valid = ModelValidators;
 
 class Chat {
   Chat({
+    required this.modelRef,
     required this.chatMessages,
     required this.picnicId,
     required this.topic,
   });
 
+  final DocumentReference modelRef;
   final DocumentReference chatMessages;
   final String picnicId;
   final String topic;
   bool valid = true;
 
-  factory Chat.fromFirestore(Map<String, dynamic>? data) {
+  factory Chat.fromFirestore(Map<String, dynamic>? data, DocumentReference modelReference) {
     final errors = <String>[];
 
     final String? chatTopic = data?['topic'] ?? Valid.required(errors, 'topic');
@@ -31,6 +33,7 @@ class Chat {
     }
 
     return Chat(
+      modelRef: modelReference,
       chatMessages: messagesRef!,
       picnicId: picnicId!,
       topic: chatTopic!,

@@ -36,7 +36,7 @@ class _ChatListState extends State<ChatList> {
           final data = chat.data() as Map<String, dynamic>?;
 
           try {
-            final listItem = ChatListItem(model: Chat.fromFirestore(data));
+            final listItem = ChatListItem(model: Chat.fromFirestore(data, chat.reference));
             chatListItems.add(listItem);
           } on DocumentFormatException catch( e) {
             print(e);

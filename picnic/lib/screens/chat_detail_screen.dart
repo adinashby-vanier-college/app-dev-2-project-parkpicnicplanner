@@ -1,13 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:picnic/components/chat_bubble.dart';
 
 import '../components/dropdown_icon_button.dart';
+import '../exceptions/document_format_exception.dart';
+import '../models/chat.dart';
+import '../models/chat_message.dart';
 
+final _firestore = FirebaseFirestore.instance;
 
 class ChatDetailScreen extends StatefulWidget {
-  final String chatKey;
-
-  ChatDetailScreen({super.key, required this.chatKey});
+  const ChatDetailScreen({super.key, required this.chatModel});
+  final Chat chatModel;
 
   @override
   State<ChatDetailScreen> createState() => _ChatDetailScreenState();
@@ -17,53 +21,103 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   final TextEditingController messageController = TextEditingController();
   final ScrollController scrollController = ScrollController();
 
-
   bool hasNoMessageText = true;
-
-  void _scrollToBottom() {
-    if (scrollController.hasClients) {
-      scrollController.animateTo(
-        scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
-  }
+  bool initialLoad = true;
 
   //Shared styles
   ButtonStyle iconBtnStyle = IconButton.styleFrom(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
   );
 
-  //TODO: replace with real chat... for now, use mockup
-  final List<ChatMessage> fakeMessages = [
-    const ChatMessage(
-      content: "Hello there?",
-      senderId: "1",
-      senderName: "Fred",
-    ),
-    const ChatMessage(content: "Sup!", senderId: "2", senderName: "Tony"),
-    const ChatMessage(content: "Hi Guys!", senderId: "3", senderName: "Kekoa"),
-  ];
+  void _scrollToBottom() {
+    if (scrollController.hasClients) {
+      if (!initialLoad) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      } else {
+        scrollController.jumpTo(
+          scrollController.position.maxScrollExtent,
+        );
+        setState(() {
+          initialLoad = false;
+        });
+      }
+    }
+  }
+
+  Widget _fetchChatMessages(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: widget.chatModel.chatMessages.collection("messages").orderBy("timestamp").snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(
+            child: CircularProgressIndicator(
+              backgroundColor: Colors.lightBlueAccent,
+            ),
+          );
+        }
+
+        final chatMessages = snapshot.data!.docs.reversed;
+
+        List<ChatMessage> messageList = [];
+
+        for (var chatMessage in chatMessages) {
+          final data = chatMessage.data() as Map<String, dynamic>?;
+
+          try {
+            final listItem = ChatMessage.fromFirestore(
+              data,
+              chatMessage.reference,
+            );
+            messageList.add(listItem);
+          } on DocumentFormatException catch (e) {
+            print(e);
+            print('Document data: $data');
+          }
+        }
+
+        //Create a ChatBubble for each ChatMessage
+        List<Widget> messageWidgetList = messageList.map((ChatMessage msg) {
+          return Container(
+            margin: EdgeInsets.symmetric(vertical: 10),
+            child: ChatBubble(
+              userBubble: false,
+              content: msg.content,
+              senderName: "none",
+            ),
+          );
+        }).toList();
+
+        // Scroll to bottom after the frame is built
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _scrollToBottom();
+        });
+
+        return ListView(
+          shrinkWrap: true,
+          reverse: true,
+          children: messageWidgetList,
+        );
+      },
+    );
+  }
 
   void _sendMessage() {
     String messageContent = messageController.text;
 
-    setState(() {
-      fakeMessages.add(
-        ChatMessage(
-          content: messageContent,
-          senderName: "Kekoa",
-          senderId: "3",
-        ),
-      );
-      messageController.text = "";
-      hasNoMessageText = true;
+    widget.chatModel.chatMessages.collection("messages").add({
+      "content": messageContent,
+      'timestamp': FieldValue.serverTimestamp(),
     });
-    _scrollToBottom();
+
+    messageController.text = "";
+    hasNoMessageText = true;
   }
 
-  void _onMessageChange(String msg){
+  void _onMessageChange(String msg) {
     setState(() {
       hasNoMessageText = msg.isEmpty;
     });
@@ -112,7 +166,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             Icon(Icons.message_outlined),
             Expanded(
               child: TextField(
-                onEditingComplete:  (hasNoMessageText) ? null : _sendMessage,
+                onEditingComplete: (hasNoMessageText) ? null : _sendMessage,
                 onChanged: _onMessageChange,
                 controller: messageController,
                 decoration: InputDecoration(
@@ -140,27 +194,18 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     );
   }
 
-  List<Widget> _buildMessageList() {
-    List<Widget> messageList = [];
-    messageList =
-        fakeMessages.map((ChatMessage msg) {
-          return ChatBubble(
-            userBubble: (msg.senderId == "3"),
-            content: msg.content,
-            senderName: msg.senderName,
-          );
-        }).toList();
-    return messageList;
-  }
-
-  Widget _buildChatBody() {
+  Widget _buildChatBody(BuildContext context) {
     return Expanded(
       child: SingleChildScrollView(
         controller: scrollController,
         padding: EdgeInsets.only(bottom: 200),
         child: Padding(
           padding: EdgeInsets.all(16),
-          child: Column(spacing: 12, children: _buildMessageList()),
+          child: AnimatedOpacity(
+            opacity: initialLoad ? 0.0 : 1.0,
+            duration: Duration(milliseconds: 300),
+            child: _fetchChatMessages(context)
+          ),
         ),
       ),
     );
@@ -174,7 +219,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         mainAxisSize: MainAxisSize.max,
         children: [
           _buildChatActionBar(),
-          _buildChatBody(),
+          Container(child: _buildChatBody(context)),
           _buildChatMessageBar(),
         ],
       ),
@@ -190,18 +235,18 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 }
 
 //Code below is just for mockup
-class ChatMessage {
-  final String content;
-  final String senderId;
-  final String senderName;
-
-  const ChatMessage({
-    required this.content,
-    required this.senderId,
-    required this.senderName,
-  });
-
-  bool isUsersMessage({senderId}) {
-    return (this.senderId == senderId);
-  }
-}
+// class ChatMessage {
+//   final String content;
+//   final String senderId;
+//   final String senderName;
+//
+//   const ChatMessage({
+//     required this.content,
+//     required this.senderId,
+//     required this.senderName,
+//   });
+//
+//   bool isUsersMessage({senderId}) {
+//     return (this.senderId == senderId);
+//   }
+// }

@@ -25,7 +25,7 @@ class _ChatListItemState extends State<ChatListItem> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChatDetailScreen(chatKey: "1337"),
+        builder: (context) => ChatDetailScreen(chatModel: widget.model),
       ),
     );
   }
