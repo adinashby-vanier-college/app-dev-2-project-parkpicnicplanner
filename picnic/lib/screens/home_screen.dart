@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Navigator.pushReplacementNamed(context, '/home');
         }),
         _buildNavButton(Icons.message, 'Messages', () {
-          // Navigate to Messages screen
+          Navigator.pushNamed(context, '/debug', arguments: widget.user);
         }),
         _buildNavButton(Icons.person, 'Profile', () {
           Navigator.pushNamed(context, '/profile', arguments: widget.user);
