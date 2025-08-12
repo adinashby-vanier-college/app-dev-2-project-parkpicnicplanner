@@ -19,15 +19,23 @@ class _LoginScreenState extends State<LoginScreen> {
   static const String _adminPassword = "admin";
 
   Future<void> _signIn() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // Validate fields
+    if (email.isEmpty || password.isEmpty) {
+      setState(() {
+        _error = 'Please fill in all fields';
+      });
+      return;
+    }
+
     setState(() {
       _loading = true;
       _error = null;
     });
 
     try {
-      final email = _emailController.text.trim();
-      final password = _passwordController.text.trim();
-
       // Check for hardcoded admin credentials
       if (email == _adminEmail && password == _adminPassword) {
         // Bypass Firebase auth and navigate to admin home
@@ -42,8 +50,25 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       Navigator.pushReplacementNamed(context, '/home');
     } on FirebaseAuthException catch (e) {
+      String errorMessage;
+      switch (e.code) {
+        case 'invalid-email':
+          errorMessage = 'Invalid email address';
+          break;
+        case 'user-disabled':
+          errorMessage = 'This account has been disabled';
+          break;
+        case 'user-not-found':
+          errorMessage = 'No account found with this email';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Incorrect password';
+          break;
+        default:
+          errorMessage = 'Login failed. Please try again';
+      }
       setState(() {
-        _error = e.message;
+        _error = errorMessage;
       });
     } finally {
       setState(() {
@@ -65,13 +90,21 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (_error != null)
-              Text(_error!, style: const TextStyle(color: Colors.red)),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Text(
+                  _error!,
+                  style: const TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(
                 labelText: 'Email',
                 border: OutlineInputBorder(),
               ),
+              keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 20),
             TextField(
