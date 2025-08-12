@@ -3,7 +3,7 @@ import 'package:picnic/exceptions/document_format_exception.dart';
 import 'package:picnic/validators/model_validators.dart';
 
 //Alias validator type
-typedef Valid = ModelValidators;
+typedef _Valid = ModelValidators;
 
 class ChatMessage {
   ChatMessage({
@@ -17,7 +17,7 @@ class ChatMessage {
   factory ChatMessage.fromFirestore(Map<String, dynamic>? data, DocumentReference modelReference) {
     final errors = <String>[];
 
-    final String? content = data?['content'] ?? Valid.required(errors, 'content');
+    final String? content = data?['content'] ?? _Valid.required(errors, 'content');
 
     if (errors.isNotEmpty) {
       throw DocumentFormatException("Missing required fields");
