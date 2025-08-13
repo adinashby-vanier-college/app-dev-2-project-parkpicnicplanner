@@ -19,7 +19,7 @@ class ChatList extends StatefulWidget {
 class _ChatListState extends State<ChatList> {
   Widget _fetchChats(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('chats').where("picnic_id", isEqualTo: widget.picnicId).snapshots(),
+      stream: _firestore.collection('chats').where("picnicUid", isEqualTo: widget.picnicId).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Center(

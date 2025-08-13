@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:picnic/components/chat_bubble.dart';
 
@@ -8,6 +9,9 @@ import '../models/chat.dart';
 import '../models/chat_message.dart';
 
 final _firestore = FirebaseFirestore.instance;
+final _auth = FirebaseAuth.instance;
+
+User? _loggedInUser;
 
 class ChatDetailScreen extends StatefulWidget {
   const ChatDetailScreen({super.key, required this.chatModel});
@@ -28,6 +32,23 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   ButtonStyle iconBtnStyle = IconButton.styleFrom(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
   );
+
+  @override
+  void initState() {
+    super.initState();
+    getCurrentUser();
+  }
+
+  void getCurrentUser() async {
+    try {
+      final user = await _auth.currentUser;
+      if (user != null) {
+        _loggedInUser = user;
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
 
   void _scrollToBottom() {
     if (scrollController.hasClients) {
@@ -50,7 +71,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
   Widget _fetchChatMessages(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: widget.chatModel.chatMessages.collection("messages").orderBy("timestamp").snapshots(),
+      stream: widget.chatModel.chatMessagesRef.collection("messages").orderBy("timestamp").snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Center(
@@ -84,9 +105,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           return Container(
             margin: EdgeInsets.symmetric(vertical: 10),
             child: ChatBubble(
-              userBubble: false,
               content: msg.content,
               senderName: "none",
+              userBubble: ( msg.senderUid == _loggedInUser?.uid),
             ),
           );
         }).toList();
@@ -108,9 +129,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   void _sendMessage() {
     String messageContent = messageController.text;
 
-    widget.chatModel.chatMessages.collection("messages").add({
+    widget.chatModel.chatMessagesRef.collection("messages").add({
       "content": messageContent,
       'timestamp': FieldValue.serverTimestamp(),
+      "senderUid": _loggedInUser!.uid,
     });
 
     messageController.text = "";
@@ -121,12 +143,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     setState(() {
       hasNoMessageText = msg.isEmpty;
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    //TODO: load actual chat
   }
 
   Widget _buildChatActionBar() {
@@ -233,20 +249,3 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     super.dispose();
   }
 }
-
-//Code below is just for mockup
-// class ChatMessage {
-//   final String content;
-//   final String senderId;
-//   final String senderName;
-//
-//   const ChatMessage({
-//     required this.content,
-//     required this.senderId,
-//     required this.senderName,
-//   });
-//
-//   bool isUsersMessage({senderId}) {
-//     return (this.senderId == senderId);
-//   }
-// }
