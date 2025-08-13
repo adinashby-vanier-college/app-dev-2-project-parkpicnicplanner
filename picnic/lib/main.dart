@@ -22,7 +22,7 @@ void main() async {
   );
 
   // Sign in anonymously and wait for completion
-  await auth.FirebaseAuth.instance.signInAnonymously();
+  // await auth.FirebaseAuth.instance.signInAnonymously();
 
   runApp(const ParkPicnicPlannerApp());
 }
