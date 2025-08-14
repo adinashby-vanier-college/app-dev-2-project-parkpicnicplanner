@@ -12,6 +12,10 @@ import 'screens/all_parks_screen.dart';
 import 'screens/profile_screen.dart';
 import 'models/user.dart';
 import 'services/firestore_service.dart';
+import 'package:get_it/get_it.dart';
+import 'services/service_locator.dart' as sl;
+
+final getIt = GetIt.instance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,9 +25,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Sign in anonymously and wait for completion
-  // await auth.FirebaseAuth.instance.signInAnonymously();
-
+  sl.setupServices();
   runApp(const ParkPicnicPlannerApp());
 }
 

@@ -1,60 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:picnic/components/chat_list_item.dart';
-import 'package:picnic/components/requested_items_list_items.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:picnic/services/chat_service.dart';
 
 import '../exceptions/document_format_exception.dart';
 import '../models/chat.dart';
+import 'package:picnic/services/service_locator.dart';
 
-final _firestore = FirebaseFirestore.instance;
 
-class ChatList extends StatefulWidget {
+class ChatList extends StatelessWidget {
   const ChatList({super.key, required this.picnicId});
   final String picnicId;
 
-  @override
-  State<ChatList> createState() => _ChatListState();
-}
+  Widget _buildContent(
+    BuildContext context,
+    AsyncSnapshot<List<Chat>> snapshot,
+  ) {
 
-class _ChatListState extends State<ChatList> {
-  Widget _fetchChats(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('chats').where("picnicUid", isEqualTo: widget.picnicId).snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Center(
-            child: CircularProgressIndicator(
-              backgroundColor: Colors.lightBlueAccent,
-            ),
-          );
-        }
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return Center(
+        child: CircularProgressIndicator(
+          backgroundColor: Colors.lightBlueAccent,
+        ),
+      );
+    }
 
-        final chats = snapshot.data!.docs;
+    if (snapshot.hasError) {
+      //TODO: report an error if it occurred
+      // return _buildErrorState(snapshot.error.toString());
+    }
 
-        List<Widget> chatListItems = [];
-        for (var chat in chats) {
-          final data = chat.data() as Map<String, dynamic>?;
+    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+      //TODO: return something more meaningful than an empty container
+      return Container();
+    }
 
-          try {
-            final listItem = ChatListItem(model: Chat.fromFirestore(data, chat.reference));
-            chatListItems.add(listItem);
-          } on DocumentFormatException catch( e) {
-            print(e);
-            print('Document data: ${data}');
-          }
+    return _buildChatList(snapshot.data!);
+  }
 
-        }
-
-        return ListView(
-          padding: EdgeInsets.all(8),
-          children: chatListItems,
-        );
+  Widget _buildChatList(List<Chat> chats) {
+    return ListView.builder(
+      padding: EdgeInsets.all(8),
+      itemCount: chats.length,
+      itemBuilder: (context, index) {
+        final chat = chats[index];
+        return ChatListItem(model: chat);
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return _fetchChats(context);
+    final chatService = getIt<ChatService>();
+
+    return StreamBuilder<List<Chat>>(
+      stream: chatService.getChatStream(picnicId),
+      builder: (context, snapshot) => _buildContent(context, snapshot),
+    );
   }
 }
