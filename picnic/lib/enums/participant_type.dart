@@ -10,7 +10,7 @@ enum ParticipantType {
     for (ParticipantType participantType in ParticipantType.values) participantType.label: participantType
   };
 
-  static ParticipantType? fromLabel(String label) => _labelMap[label];
+  static ParticipantType? fromLabel(String? label) => (label==null) ? null : _labelMap[label];
 
   @override
   String toString() => label;
