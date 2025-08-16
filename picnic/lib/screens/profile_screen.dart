@@ -111,6 +111,106 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  Future<void> _showDeleteAccountDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must tap button to close
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Delete Account',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.red,
+            ),
+          ),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to delete your account?'),
+                SizedBox(height: 10),
+                Text(
+                  'This action cannot be undone. All your data will be permanently removed.',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.orange,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Delete Account'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteAccount();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteAccount() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Delete user's profile picture if exists
+      if (_currentUser.profileImageUrl != null) {
+        await _firestoreService.deleteProfilePicture(_currentUser.id);
+      }
+
+      // Delete user from Firestore
+      await _firestoreService.deleteUser(_currentUser.id);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account deleted successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Navigate back to login or home screen
+        // You might want to replace this with your app's login route
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/login', // Replace with your login route
+              (Route<dynamic> route) => false,
+        );
+      }
+
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting account: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -132,7 +232,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   : const Icon(Icons.check),
               onPressed: _isLoading ? null : _saveChanges,
             ),
-          ] else
+          ] else ...[
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () {
@@ -141,6 +241,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 });
               },
             ),
+            PopupMenuButton<String>(
+              onSelected: (String value) {
+                if (value == 'delete') {
+                  _showDeleteAccountDialog();
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_forever, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text(
+                        'Delete Account',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
       body: SingleChildScrollView(
