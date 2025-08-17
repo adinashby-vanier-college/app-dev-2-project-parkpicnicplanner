@@ -97,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         _buildNavButton(Icons.edit_calendar_rounded, 'Create Picnic', () {
-          Navigator.pushReplacementNamed(context, '/create');
+          Navigator.pushNamed(context, '/create');
         }),
         _buildNavButton(Icons.message, 'Messages', () {
           Navigator.pushNamed(context, '/debug', arguments: widget.user);

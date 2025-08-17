@@ -102,6 +102,12 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
             ),
           ],
         ),
+         persistentFooterButtons: [
+           ElevatedButton(onPressed: (){
+             if (Navigator.canPop(context)) Navigator.of(context).pop();
+           }, child: Text("Cancel")),
+           ElevatedButton(onPressed: (){}, child: Text("Create"))
+         ],
       ),
     );
   }
