@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:picnic/screens/picnic_chats_screen.dart';
+import 'package:picnic/screens/picnic_creation_screen.dart';
 
 import 'package:picnic/screens/register_screen.dart';
 import 'config/firebase_options.dart';
@@ -49,7 +50,8 @@ class ParkPicnicPlannerApp extends StatelessWidget {
         '/parks': (context) => const AllParksScreen(),
         '/profile': (context) => ProfileScreenWrapper(),
         '/register': (context) => const RegisterScreen(),
-        '/debug': (context) => const PicnicChatsScreen()
+        '/debug': (context) => const PicnicChatsScreen(),
+        '/create': (context) => const PicnicCreationScreen()
       },
     );
   }
