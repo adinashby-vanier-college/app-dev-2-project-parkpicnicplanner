@@ -42,26 +42,32 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
+                spacing:10,
                 children: [
-                  Placeholder(
-                    color: Colors.blueGrey,
-                    strokeWidth: 2.0,
-                    fallbackHeight: 100.0,
-                    fallbackWidth: 100.0,
-                  ),
+                  // Placeholder(
+                  //   color: Colors.blueGrey,
+                  //   strokeWidth: 2.0,
+                  //   fallbackHeight: 100.0,
+                  //   fallbackWidth: 100.0,
+                  // ),
                   DecoratedBox(
                     decoration: BoxDecoration(
-                      color: Colors.lightGreen.shade200,
+                      color: Colors.grey.shade300,
                     ),
                     child: Container(
                       width: double.infinity,
                       child: Padding(
                         padding: EdgeInsets.symmetric(
                           horizontal: 16,
-                          vertical: 8,
+                          vertical:16,
                         ),
-                        child: Text(
-                          "Picnic Name",
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            labelText: 'Picnic Name',
+                            border: OutlineInputBorder(),
+                            fillColor: Colors.white,
+                            filled: true,
+                          ),
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -102,12 +108,22 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
             ),
           ],
         ),
-         persistentFooterButtons: [
-           ElevatedButton(onPressed: (){
-             if (Navigator.canPop(context)) Navigator.of(context).pop();
-           }, child: Text("Cancel")),
-           ElevatedButton(onPressed: (){}, child: Text("Create"))
-         ],
+        persistentFooterButtons: [
+          ElevatedButton(
+            onPressed: () {
+              if (Navigator.canPop(context)) Navigator.of(context).pop();
+            },
+            child: Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            ),
+            child: Text("Create"),
+          ),
+        ],
       ),
     );
   }
