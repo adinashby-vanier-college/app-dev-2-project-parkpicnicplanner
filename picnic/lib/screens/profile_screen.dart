@@ -186,7 +186,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
 
         // Navigate back to login or home screen
-        // You might want to replace this with your app's login route
         Navigator.of(context).pushNamedAndRemoveUntil(
           '/login', // Replace with your login route
               (Route<dynamic> route) => false,

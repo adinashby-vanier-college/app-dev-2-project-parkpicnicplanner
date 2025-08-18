@@ -23,7 +23,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   }
 
   Future<void> _loadEventLocation() async {
-    // Simulate getting event location (in a real app, this would come from your backend)
+    // Simulate getting event location
     final position = await LocationService.getCurrentPosition();
     if (position != null) {
       final address = await LocationService.getAddressFromLatLng(
