@@ -1,0 +1,10 @@
+[Both]
+We made joint efforts to develop the concepts behind each of the screens, in addition to the flow which we made using a mix of Figma and Lucid.app. We constantly reviewed each others’ contributions to ensure that spelling and grammar mistakes were found along with other issues.
+
+[Josh]
+Took the lead on integrating Firebase authentication with the application. In addition, he created the profile screen and login screen ensuring that it worked with te DB and allowed for the creation of more user details in Firestore.
+Additionally, he completed work on the weather screen, home screen and event detail screens. Josh also contributed to improving the separation of concerns between classes and the structuring of the project.
+
+[Kekoa]
+Invested time and energy into aligning the Firebase database with the needs of the project, troubleshooting rule-related issues and working on the structure for the chat functionality. He helped build the register and picnic creation screens.
+Additionally, work was done on chat and messaging related screens. Kekoa looked at different service injection and layer approaches, settling on using a simple approach for separating business logic from widgets by using the package get_it.
