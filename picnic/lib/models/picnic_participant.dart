@@ -7,47 +7,67 @@ import 'package:picnic/validators/model_validators.dart';
 typedef _Valid = ModelValidators;
 
 class PicnicParticipant {
+  static String get modelName => 'PicnicParticipant';
+
   PicnicParticipant({
+    required this.persisted,
     required this.participantNickname,
-    required this.picnicUid,
     required this.userUid,
-    required this.modelRef,
+    this.modelRef,
     this.participantBlurb = "",
     required this.participantType
   });
 
-  final DocumentReference modelRef;
+  final DocumentReference? modelRef;
+  final bool persisted;
 
-  final String participantNickname;
   final String userUid;
-  final String picnicUid;
+  final String participantNickname;
   String participantBlurb;
   final ParticipantType participantType;
 
-  factory PicnicParticipant.fromFirestore(Map<String, dynamic>? data, DocumentReference modelReference) {
+  factory PicnicParticipant.fromFirestore(DocumentSnapshot doc) {
+    return PicnicParticipant.fromMap(doc.data() as Map<String, dynamic>?, dbOrigin: true, modelRef: doc.reference);
+  }
+
+  factory PicnicParticipant.fromMap(Map<String,dynamic>? data, {bool dbOrigin=false, DocumentReference? modelRef}){
     final errors = <String>[];
+
 
     final String? participantName = data?['participantNickname'] ?? _Valid.required(errors, 'participantNickname');
     final String? userUid = data?['userUid'] ?? _Valid.required(errors,'userUid');
-    final String? picnicUid = data?['picnicUid'] ?? _Valid.required(errors,'picnicUid');
-
     final String participantBlurb = data?['participantBlurb'] ?? "";
 
-    final ParticipantType? participantType = ParticipantType.fromLabel(data?['participantType']) ?? _Valid.required(errors, 'participantType');
+    final ParticipantType? participantType;
 
+    if (!dbOrigin) {
+      participantType = ParticipantType.fromLabel(data?['participantType']) ??
+          ParticipantType.active;
+    } else {
+      participantType = ParticipantType.fromLabel(data?['participantType']) ?? _Valid.required(errors, 'participantType');
+    }
 
     if (errors.isNotEmpty) {
-      throw DocumentFormatException("Missing required fields");
+      throw DocumentFormatException("Missing [${errors.length}] required field(s) for model <${PicnicParticipant.modelName}>:\n\t ${errors.join("\n\t")}");
     }
 
     return PicnicParticipant(
+      persisted: dbOrigin,
       participantNickname: participantName!,
       userUid: userUid!,
-      picnicUid: picnicUid!,
       participantBlurb: participantBlurb,
-      modelRef: modelReference,
-        participantType: participantType!
+      modelRef: modelRef,
+      participantType: participantType!,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'userUid': userUid,
+      'participantNickname': participantNickname,
+      'participantBlurb': participantBlurb,
+      'participantType': participantType.label
+    };
   }
 
 }
