@@ -27,7 +27,7 @@ class Park {
       address: data['vicinity'] ?? 'Unknown address',
       latitude: location['lat'].toDouble(),
       longitude: location['lng'].toDouble(),
-      distance: 0, // Will be calculated later
+      distance: 0,
       rating: data['rating']?.toDouble(),
     );
   }
