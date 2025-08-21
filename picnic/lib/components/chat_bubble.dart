@@ -39,14 +39,20 @@ class _ChatBubbleState extends State<ChatBubble> {
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(12)),
-              color:
-                  (widget.userBubble)
-                      ? Colors.amberAccent
-                      : Colors.blueGrey[100],
+              color: (widget.userBubble)
+                  ? Colors.amberAccent
+                  : Colors.blueGrey[100],
             ),
             child: Container(
               padding: EdgeInsets.all(16),
-              child: Text(widget.content, style: TextStyle(fontSize: 14)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 4,
+                children: [
+                  if (!widget.userBubble) Text(widget.senderName, style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  Text(widget.content, style: TextStyle(fontSize: 14)),
+                ],
+              ),
             ),
           ),
         ),

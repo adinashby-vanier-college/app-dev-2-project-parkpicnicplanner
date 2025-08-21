@@ -71,7 +71,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
   Widget _fetchChatMessages(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: widget.chatModel.chatMessagesRef.collection("messages").orderBy("timestamp").snapshots(),
+      stream: widget.chatModel.modelRef.collection("messages").orderBy("timestamp").snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Center(
@@ -88,10 +88,17 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         for (var chatMessage in chatMessages) {
           final data = chatMessage.data() as Map<String, dynamic>?;
 
+          //in the case of no data, skip iteration
+          if (data == null) continue;
+
+          //Lookup additional data and add it to the chat message
+
+          data['senderName'] = "hello";
+
           try {
-            final listItem = ChatMessage.fromFirestore(
+            final listItem = ChatMessage.fromMap(
               data,
-              chatMessage.reference,
+              modelRef: chatMessage.reference,
             );
             messageList.add(listItem);
           } on DocumentFormatException catch (e) {
@@ -129,7 +136,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   void _sendMessage() {
     String messageContent = messageController.text;
 
-    widget.chatModel.chatMessagesRef.collection("messages").add({
+    widget.chatModel.modelRef.collection("messages").add({
       "content": messageContent,
       'timestamp': FieldValue.serverTimestamp(),
       "senderUid": _loggedInUser!.uid,

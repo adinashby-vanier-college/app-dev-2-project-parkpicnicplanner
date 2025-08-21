@@ -10,14 +10,12 @@ class Chat {
 
   Chat({
     required this.modelRef,
-    required this.chatMessagesRef,
     required this.picnicId,
     required this.topic,
     required this.participants
   });
 
   final DocumentReference modelRef;
-  final DocumentReference chatMessagesRef;
   final String picnicId;
   final String topic;
   final CollectionReference participants;
@@ -28,8 +26,6 @@ class Chat {
     final String? chatTopic = data?['topic'] ?? _Valid.required(errors, 'topic');
     final String? picnicId =
         data?['picnicUid'] ?? "test"; //TODO: Remove in later testing
-    final DocumentReference? messagesRef =
-        data?['chatMessagesRef'] ?? _Valid.required(errors, 'chatMessagesRef');
 
     //subcollections are not retrieved automatically, request them if required (will generate another query)
     final CollectionReference participants = modelReference.collection("participants");
@@ -40,7 +36,6 @@ class Chat {
 
     return Chat(
       modelRef: modelReference,
-      chatMessagesRef: messagesRef!,
       picnicId: picnicId!,
       topic: chatTopic!,
       participants: participants,

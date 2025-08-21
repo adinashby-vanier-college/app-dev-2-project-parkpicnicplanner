@@ -16,7 +16,11 @@ class ChatMessage {
   final String content;
   final String senderUid;
 
-  factory ChatMessage.fromFirestore(Map<String, dynamic>? data, DocumentReference modelReference) {
+  factory ChatMessage.fromFirestore(DocumentSnapshot doc) {
+    return ChatMessage.fromMap(doc.data() as Map<String,dynamic>?, modelRef: doc.reference);
+  }
+
+  factory ChatMessage.fromMap(Map<String, dynamic>? data, {required DocumentReference modelRef}) {
     final errors = <String>[];
 
     final String? content = data?['content'] ?? _Valid.required(errors, 'content');
@@ -27,7 +31,7 @@ class ChatMessage {
     }
 
     return ChatMessage(
-      modelRef: modelReference,
+      modelRef: modelRef,
       content: content!,
       senderUid: sender!,
     );
