@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class DateTimeSelector extends StatefulWidget {
-  DateTimeSelector({required super.key});
+  const DateTimeSelector({required super.key, required this.onDateTimeChanged});
+
+  final Function onDateTimeChanged;
 
   @override
   State<DateTimeSelector> createState() => _DateTimeSelectorState();
@@ -19,6 +21,17 @@ class _DateTimeSelectorState extends State<DateTimeSelector> {
 
   TimeOfDay getSelectedTime(){
     return selectedTime;
+  }
+
+  //Combined DateTime
+  DateTime? get combinedDateTime {
+    return DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      selectedTime.hour,
+      selectedTime.minute,
+    );
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -38,6 +51,7 @@ class _DateTimeSelectorState extends State<DateTimeSelector> {
       setState(() {
         selectedDate = picked;
       });
+      widget.onDateTimeChanged.call(combinedDateTime);
     }
   }
 
@@ -54,12 +68,14 @@ class _DateTimeSelectorState extends State<DateTimeSelector> {
       setState(() {
         selectedTime = picked;
       });
+      widget.onDateTimeChanged.call(combinedDateTime);
     }
   }
 
   @override
   void initState() {
     super.initState();
+    widget.onDateTimeChanged.call(combinedDateTime);
   }
 
   @override
