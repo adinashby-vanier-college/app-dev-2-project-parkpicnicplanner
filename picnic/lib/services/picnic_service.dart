@@ -1,22 +1,38 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:picnic/models/picnic.dart';
+import 'package:picnic/services/picnic_participant_service.dart';
+import 'package:picnic/services/service_locator.dart';
 
 class PicnicService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final _auth = auth.FirebaseAuth.instance;
+  final picnicParticipantService = getIt<PicnicParticipantService>();
 
-  // // Create or update user
-  // Future<void> saveUser(User user) async {
-  //   try {
-  //     await _firestore
-  //         .collection('users')
-  //         .doc(user.id)
-  //         .update(user.toUpdateMap());
-  //   } catch (e) {
-  //     throw Exception('Failed to save user: $e');
-  //   }
-  // }
+  // Create a picnic
+  Future<void> createPicnic(Picnic picnic) async {
+    Map<String,dynamic> modelMap = picnic.toMap();
+    String userUID = _auth.currentUser!.uid;
+
+    try {
+      await _firestore.runTransaction((transaction) async {
+        modelMap['ownerId'] ??= userUID;
+        modelMap['createdAt'] ??= FieldValue.serverTimestamp();
+        modelMap['updatedAt'] ??= FieldValue.serverTimestamp();
+        modelMap['description'] ??= "";
+
+        transaction.set(
+            _firestore.collection('picnics').doc(modelMap['id']),
+            modelMap
+        );
+
+      });
+      picnicParticipantService.createPicnicParticipant(picnicUid: modelMap['id'], userUid: userUID );
+
+    } catch (e) {
+      throw Exception('Failed to save picnic: $e');
+    }
+  }
 
   // Get picnic participant by picnicUid and userUid
   Future<Picnic?> getPicnic(String picnicUid) async {

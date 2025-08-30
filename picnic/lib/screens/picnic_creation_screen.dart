@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:picnic/components/date_time_selector.dart';
+import 'package:picnic/services/picnic_service.dart';
+
+import '../models/picnic.dart';
+import '../services/service_locator.dart';
 
 class PicnicCreationScreen extends StatefulWidget {
   const PicnicCreationScreen({super.key});
@@ -11,8 +15,21 @@ class PicnicCreationScreen extends StatefulWidget {
 class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
   ValueNotifier<bool> _isFixedSchedule = ValueNotifier<bool>(true);
   final GlobalKey _dateTimeSelectorKey = GlobalKey();
+  final TextEditingController _picnicNameTextController =
+      TextEditingController();
+  final TextEditingController _picnicDescriptionTextController =
+      TextEditingController();
+
+  final picnicService = getIt<PicnicService>();
 
   String _scheduleType = "fixed";
+  DateTime? scheduledDateTime;
+
+  void _handleDateSelectorChange(DateTime newDateTime) {
+    setState(() {
+      scheduledDateTime = newDateTime;
+    });
+  }
 
   @override
   void initState() {
@@ -42,7 +59,7 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                spacing:10,
+                spacing: 10,
                 children: [
                   // Placeholder(
                   //   color: Colors.blueGrey,
@@ -51,17 +68,16 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
                   //   fallbackWidth: 100.0,
                   // ),
                   DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                    ),
+                    decoration: BoxDecoration(color: Colors.grey.shade300),
                     child: Container(
                       width: double.infinity,
                       child: Padding(
                         padding: EdgeInsets.symmetric(
                           horizontal: 16,
-                          vertical:16,
+                          vertical: 16,
                         ),
                         child: TextField(
+                          controller: _picnicNameTextController,
                           decoration: const InputDecoration(
                             labelText: 'Picnic Name',
                             border: OutlineInputBorder(),
@@ -116,7 +132,14 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
             child: Text("Cancel"),
           ),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Picnic newPicnic = Picnic(
+                name: _picnicNameTextController.text,
+                description: _picnicDescriptionTextController.text,
+                scheduledAt: scheduledDateTime,
+              );
+              picnicService.createPicnic(newPicnic);
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -174,7 +197,10 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 10),
-        DateTimeSelector(key: _dateTimeSelectorKey),
+        DateTimeSelector(
+          key: _dateTimeSelectorKey,
+          onDateTimeChanged: _handleDateSelectorChange,
+        ),
       ],
     );
   }
@@ -195,10 +221,12 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
         SizedBox(height: 10),
         Expanded(
           child: TextField(
+            controller: _picnicDescriptionTextController,
             expands: true,
             textAlign: TextAlign.left,
             textAlignVertical: TextAlignVertical.top,
-            maxLines: null, // Allows unlimited lines
+            maxLines: null,
+            // Allows unlimited lines
             keyboardType: TextInputType.multiline,
             decoration: InputDecoration(
               hintText: 'Enter picnic description...',
