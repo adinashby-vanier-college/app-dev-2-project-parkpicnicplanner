@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 
 class DateTimeSelector extends StatefulWidget {
@@ -75,11 +76,15 @@ class _DateTimeSelectorState extends State<DateTimeSelector> {
   @override
   void initState() {
     super.initState();
-    widget.onDateTimeChanged.call(combinedDateTime);
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      widget.onDateTimeChanged.call(combinedDateTime);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
