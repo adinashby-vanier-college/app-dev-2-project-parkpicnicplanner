@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:picnic/components/date_time_selector.dart';
 import 'package:picnic/services/picnic_service.dart';
 
+import '../components/basic_map.dart';
 import '../models/picnic.dart';
 import '../services/service_locator.dart';
 
@@ -117,7 +118,7 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
                   children: [
                     _buildSchedulePane(),
                     _buildDescriptionPane(),
-                    Text("LOCATION"),
+                    _buildLocationPane(),
                   ],
                 ),
               ),
@@ -207,6 +208,10 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
 
   Widget _buildSchedulePoll() {
     return Text("Poll");
+  }
+
+  Widget _buildLocationPane() {
+    return BasicMap();
   }
 
   Widget _buildDescriptionPane() {
