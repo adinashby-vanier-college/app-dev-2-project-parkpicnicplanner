@@ -133,14 +133,7 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
             child: Text("Cancel"),
           ),
           ElevatedButton(
-            onPressed: () {
-              Picnic newPicnic = Picnic(
-                name: _picnicNameTextController.text,
-                description: _picnicDescriptionTextController.text,
-                scheduledAt: scheduledDateTime,
-              );
-              picnicService.createPicnic(newPicnic);
-            },
+            onPressed: _createPicnic,
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -151,6 +144,26 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
       ),
     );
   }
+
+  void _createPicnic() {
+            Picnic newPicnic = Picnic(
+              name: _picnicNameTextController.text,
+              description: _picnicDescriptionTextController.text,
+              scheduledAt: scheduledDateTime,
+            );
+            picnicService.createPicnic(newPicnic);
+
+            if (Navigator.canPop(context)) Navigator.of(context).pop();
+
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.green,
+                    content: Text('Picnic Created Successfully!')
+                )
+            );
+          }
 
   Widget _buildSchedulePane() {
     return Column(
