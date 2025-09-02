@@ -115,6 +115,7 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
               child: Padding(
                 padding: EdgeInsets.all(16),
                 child: TabBarView(
+                  physics: NeverScrollableScrollPhysics(),
                   children: [
                     _buildSchedulePane(),
                     _buildDescriptionPane(),
