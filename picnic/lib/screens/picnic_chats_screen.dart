@@ -95,6 +95,7 @@ class _PicnicChatsScreenState extends State<PicnicChatsScreen>
 
      Chat newChat = Chat(picnicId:"test",topic:newChatTopic);
      chatService.createChat(newChat);
+     _newChatTopicField.clear();
   }
 
   void showAddChatDialog(BuildContext context) {
