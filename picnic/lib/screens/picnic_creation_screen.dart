@@ -161,7 +161,7 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            behavior: SnackBarBehavior.floating,
+          behavior: SnackBarBehavior.floating,
           duration: Duration(seconds: 5),
           backgroundColor: Colors.red,
           content: Text('Errors found:\n $errorStringList'),
@@ -195,34 +195,7 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Flexible(
-          child: ListView(
-            children: [
-              SwitchListTile(
-                title: Text('Schedule - $_scheduleType'),
-                value: _isFixedSchedule.value,
-                onChanged: (value) {
-                  setState(() {
-                    _isFixedSchedule.value = value;
-                  });
-                },
-              ),
-              SizedBox(height: 10),
-              AnimatedSwitcher(
-                duration: Duration(milliseconds: 350),
-                child: (_isFixedSchedule.value)
-                    ? Container(
-                        key: ValueKey('fixed'),
-                        child: _buildFixedSchedule(),
-                      )
-                    : Container(
-                        key: ValueKey('poll'),
-                        child: _buildSchedulePoll(),
-                      ),
-              ),
-            ],
-          ),
-        ),
+        Flexible(child: ListView(children: [_buildFixedSchedule()])),
       ],
     );
   }
