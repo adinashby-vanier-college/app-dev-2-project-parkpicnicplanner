@@ -59,19 +59,18 @@ class ChatService {
     });
   }
 
-  // // Create initial Chat document
-  // Future<void> createChat(Chat chat) async {
-  //   try {
-  //     final newChat = chat.copyWith(
-  //       createdAt: DateTime.now(),
-  //       updatedAt: DateTime.now(),
-  //     );
-  //     await _firestore
-  //         .collection('chats')
-  //         .doc(chat.id)
-  //         .set(newChat.toMap());
-  //   } catch (e) {
-  //     throw Exception('Failed to create chat: $e');
-  //   }
-  // }
+  Future<void> createChat(Chat chat) async {
+    try {
+      final newChat = chat.copyWith(
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      await _firestore
+          .collection('chats')
+          .doc()
+          .set(newChat.toMap());
+    } catch (e) {
+      throw Exception('Failed to create chat: $e');
+    }
+  }
 }

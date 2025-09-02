@@ -2,10 +2,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:picnic/components/basic_dialog.dart';
 import 'package:picnic/components/chat_list.dart';
+import 'package:picnic/services/chat_service.dart';
 import 'package:picnic/services/picnic_participant_service.dart';
 import '../mixins/overlay_mixin.dart';
 
 import 'package:picnic/services/service_locator.dart';
+
+import '../models/chat.dart';
 
 class PicnicChatsScreen extends StatefulWidget {
   const PicnicChatsScreen({super.key});
@@ -16,7 +19,10 @@ class PicnicChatsScreen extends StatefulWidget {
 
 class _PicnicChatsScreenState extends State<PicnicChatsScreen>
     with OverlayMixin {
+  final TextEditingController _newChatTopicField = TextEditingController();
+
   final GlobalKey _fabKey = GlobalKey();
+
 
   @override
   Widget build(BuildContext context) {
@@ -62,19 +68,13 @@ class _PicnicChatsScreenState extends State<PicnicChatsScreen>
               ],
             ).then((value) {
               if (value != null) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('Selected: $value')));
+                // ScaffoldMessenger.of(
+                //   context,
+                // ).showSnackBar(SnackBar(content: Text('Selected: $value')));
 
                 switch (value) {
                   case "new_chat":
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return BasicDialog(content:Text("Blah"), actionLabel:"Create",
-                        );
-                      },
-                    );
+                    showAddChatDialog(context);
                     break;
                   default:
                 }
@@ -84,6 +84,34 @@ class _PicnicChatsScreenState extends State<PicnicChatsScreen>
           child: Icon(Icons.add),
         ),
       ),
+    );
+  }
+
+  void _addChat(){
+     final String newChatTopic = _newChatTopicField.text;
+     final chatService = getIt<ChatService>();
+     //Exit if there is no topic provided
+     if (newChatTopic.isEmpty) return;
+
+     Chat newChat = Chat(picnicId:"test",topic:newChatTopic);
+     chatService.createChat(newChat);
+  }
+
+  void showAddChatDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return BasicDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+              children: [Text("Chat Topic"),
+              TextField(controller: _newChatTopicField)],
+          ),
+          actionLabel: "Create",
+          actionCallback: _addChat,
+        );
+      },
     );
   }
 

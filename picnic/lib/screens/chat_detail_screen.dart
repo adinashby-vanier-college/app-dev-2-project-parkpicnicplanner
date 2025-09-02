@@ -8,7 +8,6 @@ import '../exceptions/document_format_exception.dart';
 import '../models/chat.dart';
 import '../models/chat_message.dart';
 
-final _firestore = FirebaseFirestore.instance;
 final _auth = FirebaseAuth.instance;
 
 User? _loggedInUser;
@@ -71,7 +70,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
   Widget _fetchChatMessages(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: widget.chatModel.modelRef.collection("messages").orderBy("timestamp").snapshots(),
+      stream: widget.chatModel.modelRef!.collection("messages").orderBy("timestamp").snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Center(
@@ -136,7 +135,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   void _sendMessage() {
     String messageContent = messageController.text;
 
-    widget.chatModel.modelRef.collection("messages").add({
+    widget.chatModel.modelRef!.collection("messages").add({
       "content": messageContent,
       'timestamp': FieldValue.serverTimestamp(),
       "senderUid": _loggedInUser!.uid,
@@ -186,7 +185,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         child: Row(
           spacing: 12,
           children: [
-            Icon(Icons.message_outlined),
             Expanded(
               child: TextField(
                 onEditingComplete: (hasNoMessageText) ? null : _sendMessage,

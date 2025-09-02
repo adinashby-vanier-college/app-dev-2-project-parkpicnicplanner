@@ -26,7 +26,9 @@ class ChatList extends StatelessWidget {
 
     if (snapshot.hasError) {
       //TODO: report an error if it occurred
-      // return _buildErrorState(snapshot.error.toString());
+      print('\x1B[31m OUTPUT OF DEBUG \x1B[0m');
+      print(snapshot.error.toString());
+      return Text("Error Occurred");
     }
 
     if (!snapshot.hasData || snapshot.data!.isEmpty) {
