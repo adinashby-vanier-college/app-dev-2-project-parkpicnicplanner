@@ -146,24 +146,48 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
   }
 
   void _createPicnic() {
-            Picnic newPicnic = Picnic(
-              name: _picnicNameTextController.text,
-              description: _picnicDescriptionTextController.text,
-              scheduledAt: scheduledDateTime,
-            );
-            picnicService.createPicnic(newPicnic);
+    //TODO: apply validation rules to determine if picnic information is present
+    String? picnicName = _picnicNameTextController.text;
 
-            if (Navigator.canPop(context)) Navigator.of(context).pop();
+    Map<String, String> errors = <String, String>{};
 
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.green,
-                    content: Text('Picnic Created Successfully!')
-                )
-            );
-          }
+    if (picnicName.isEmpty) errors['picnic'] = "Picnic name required";
+
+    if (errors.isNotEmpty) {
+      String errorStringList = errors.entries
+          .map((entry) => " - ${entry.value}")
+          .join("\n");
+
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 5),
+          backgroundColor: Colors.red,
+          content: Text('Errors found:\n $errorStringList'),
+        ),
+      );
+
+      //Exit early to allow corrections
+      return;
+    }
+
+    Picnic newPicnic = Picnic(
+      name: picnicName,
+      description: _picnicDescriptionTextController.text,
+      scheduledAt: scheduledDateTime,
+    );
+    picnicService.createPicnic(newPicnic);
+
+    if (Navigator.canPop(context)) Navigator.of(context).pop();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.green,
+        content: Text('Picnic Created Successfully!'),
+      ),
+    );
+  }
 
   Widget _buildSchedulePane() {
     return Column(
