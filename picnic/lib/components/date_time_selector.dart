@@ -3,9 +3,10 @@ import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 
 class DateTimeSelector extends StatefulWidget {
-  const DateTimeSelector({required super.key, required this.onDateTimeChanged});
+  const DateTimeSelector({required super.key, required this.onDateTimeChanged, this.showDayOfWeek = false});
 
   final Function onDateTimeChanged;
+  final bool showDayOfWeek;
 
   @override
   State<DateTimeSelector> createState() => _DateTimeSelectorState();
@@ -77,6 +78,9 @@ class _DateTimeSelectorState extends State<DateTimeSelector> {
   void initState() {
     super.initState();
 
+    if (widget.showDayOfWeek){
+      dateFormat = DateFormat("EEEE -  MM/dd/yyyy");
+    }
     SchedulerBinding.instance.addPostFrameCallback((_) {
       widget.onDateTimeChanged.call(combinedDateTime);
     });

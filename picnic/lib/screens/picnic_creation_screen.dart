@@ -209,6 +209,7 @@ class _PicnicCreationScreenState extends State<PicnicCreationScreen> {
         ),
         SizedBox(height: 10),
         DateTimeSelector(
+          showDayOfWeek: true,
           key: _dateTimeSelectorKey,
           onDateTimeChanged: _handleDateSelectorChange,
         ),
