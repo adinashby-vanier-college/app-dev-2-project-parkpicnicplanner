@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+
 import 'package:picnic/screens/picnic_chats_screen.dart';
 import 'package:picnic/screens/picnic_creation_screen.dart';
-
 import 'package:picnic/screens/register_screen.dart';
 import 'config/firebase_options.dart';
 import 'screens/login_screen.dart';
@@ -11,20 +11,19 @@ import 'screens/home_screen.dart';
 import 'screens/event_detail_screen.dart';
 import 'screens/all_parks_screen.dart';
 import 'screens/profile_screen.dart';
+
 import 'models/user.dart';
 import 'services/firestore_service.dart';
-import 'package:get_it/get_it.dart';
 import 'services/service_locator.dart' as sl;
 
-final getIt = GetIt.instance;
-
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    name: "Park Picnic Planner",
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
 
   sl.setupServices();
   runApp(const ParkPicnicPlannerApp());
@@ -45,197 +44,101 @@ class ParkPicnicPlannerApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
-        '/home': (context) => HomeScreenWrapper(),
-        '/event': (context) => EventDetailScreenWrapper(),
         '/parks': (context) => const AllParksScreen(),
-        '/profile': (context) => ProfileScreenWrapper(),
         '/register': (context) => const RegisterScreen(),
         '/debug': (context) => const PicnicChatsScreen(),
-        '/create': (context) => const PicnicCreationScreen()
+        '/create': (context) => const PicnicCreationScreen(),
+
+        '/home': (context) => UserLoader(
+          onLoaded: (user) => HomeScreen(user: user),
+        ),
+        '/profile': (context) => UserLoader(
+          appBarTitle: 'Profile',
+          onLoaded: (user) => ProfileScreen(user: user),
+        ),
+        '/event': (context) => UserLoader(
+          onLoaded: (user) {
+            // Demo attendees that include the current user
+            final attendees = <User>[
+              user,
+              User(id: 'demo_2', name: 'Alex Johnson', email: 'alex@example.com', isPrivate: false),
+              User(id: 'demo_3', name: 'Sean Jefferies', email: 'sean@example.com', isPrivate: true),
+              User(id: 'demo_4', name: 'Danielle Watson', email: 'danielle@example.com', isPrivate: false),
+              User(id: 'demo_5', name: 'Tiffany Myers', email: 'tiffany@example.com', isPrivate: true),
+            ];
+            return EventDetailScreen(attendees: attendees);
+          },
+        ),
       },
     );
   }
 }
 
-// Wrapper to handle user loading for HomeScreen
-class HomeScreenWrapper extends StatefulWidget {
+/// - Shows a spinner while loading
+/// - Shows a simple error with a button back to login if user is null
+class UserLoader extends StatefulWidget {
+  const UserLoader({
+    super.key,
+    required this.onLoaded,
+    this.appBarTitle,
+  });
+
+  final Widget Function(User user) onLoaded;
+  final String? appBarTitle;
+
   @override
-  _HomeScreenWrapperState createState() => _HomeScreenWrapperState();
+  State<UserLoader> createState() => _UserLoaderState();
 }
 
-class _HomeScreenWrapperState extends State<HomeScreenWrapper> {
-  User? currentUser;
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCurrentUser();
-  }
-
-  Future<void> _loadCurrentUser() async {
-    final user = await getCurrentUser();
-    setState(() {
-      currentUser = user;
-      isLoading = false;
-    });
-  }
+class _UserLoaderState extends State<UserLoader> {
+  late final Future<User?> _futureUser = getCurrentUser();
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+    final body = FutureBuilder<User?>(
+      future: _futureUser,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (!snapshot.hasData || snapshot.data == null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Error loading user data'),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+                  child: const Text('Back to Login'),
+                ),
+              ],
+            ),
+          );
+        }
+        return widget.onLoaded(snapshot.data!);
+      },
+    );
+
+    if (widget.appBarTitle != null) {
+      return Scaffold(appBar: AppBar(title: Text(widget.appBarTitle!)), body: body);
     }
-
-    if (currentUser == null) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Error loading user data'),
-              ElevatedButton(
-                onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-                child: Text('Back to Login'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return HomeScreen(user: currentUser!);
-  }
-}
-
-// Wrapper to handle user loading for ProfileScreen
-class ProfileScreenWrapper extends StatefulWidget {
-  @override
-  _ProfileScreenWrapperState createState() => _ProfileScreenWrapperState();
-}
-
-class _ProfileScreenWrapperState extends State<ProfileScreenWrapper> {
-  User? currentUser;
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCurrentUser();
-  }
-
-  Future<void> _loadCurrentUser() async {
-    final user = await getCurrentUser();
-    setState(() {
-      currentUser = user;
-      isLoading = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (isLoading) {
-      return Scaffold(
-        appBar: AppBar(title: Text('Profile')),
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (currentUser == null) {
-      return Scaffold(
-        appBar: AppBar(title: Text('Profile')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Error loading user data'),
-              ElevatedButton(
-                onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-                child: Text('Back to Login'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return ProfileScreen(user: currentUser!);
-  }
-}
-
-// Wrapper for EventDetailScreen with demo attendees
-class EventDetailScreenWrapper extends StatefulWidget {
-  @override
-  _EventDetailScreenWrapperState createState() => _EventDetailScreenWrapperState();
-}
-
-class _EventDetailScreenWrapperState extends State<EventDetailScreenWrapper> {
-  User? currentUser;
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCurrentUser();
-  }
-
-  Future<void> _loadCurrentUser() async {
-    final user = await getCurrentUser();
-    setState(() {
-      currentUser = user;
-      isLoading = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (isLoading) {
-      return Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (currentUser == null) {
-      return Scaffold(
-        body: Center(child: Text('Error loading user data')),
-      );
-    }
-
-    // Create demo attendees with proper IDs
-    final List<User> demoAttendees = [
-      currentUser!,
-      User(id: 'demo_2', name: 'Alex Johnson', email: 'alex@example.com', isPrivate: false),
-      User(id: 'demo_3', name: 'Sean Jefferies', email: 'sean@example.com', isPrivate: true),
-      User(id: 'demo_4', name: 'Danielle Watson', email: 'danielle@example.com', isPrivate: false),
-      User(id: 'demo_5', name: 'Tiffany Myers', email: 'tiffany@example.com', isPrivate: true),
-    ];
-
-    return EventDetailScreen(attendees: demoAttendees);
+    return Scaffold(body: body);
   }
 }
 
 // Function to get or create current user with proper Firebase Auth ID
 Future<User?> getCurrentUser() async {
   try {
-    // Get current Firebase Auth user
     final firebaseUser = auth.FirebaseAuth.instance.currentUser;
-    if (firebaseUser == null) {
-      return null;
-    }
+    if (firebaseUser == null) return null;
 
-    // Try to get existing user from Firestore
     final firestoreService = FirestoreService();
-    User? existingUser = await firestoreService.getUser(firebaseUser.uid);
+    final existingUser = await firestoreService.getUser(firebaseUser.uid);
+    if (existingUser != null) return existingUser;
 
-    if (existingUser != null) {
-      return existingUser;
-    }
-
-    // Create new user with Firebase Auth data
     final newUser = User(
-      id: firebaseUser.uid,  // Use Firebase Auth UID
+      id: firebaseUser.uid,
       name: firebaseUser.displayName ?? 'Anonymous User',
       email: firebaseUser.email ?? 'anonymous@example.com',
       bio: 'Nature lover and picnic enthusiast',
@@ -245,12 +148,9 @@ Future<User?> getCurrentUser() async {
       updatedAt: DateTime.now(),
     );
 
-    // Save to Firestore
     await firestoreService.createUser(newUser);
-
     return newUser;
-
-  } catch (e) {
+  } catch (_) {
     return null;
   }
 }
