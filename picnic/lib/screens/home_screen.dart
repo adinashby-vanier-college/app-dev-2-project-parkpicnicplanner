@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../models/park.dart';
@@ -20,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadLocationData();
+    unawaited(_loadLocationData());
   }
 
   Future<void> _loadLocationData() async {
@@ -32,21 +34,26 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
 
-      final address = await LocationService.getSimpleAddress(
+      Future.wait([
+      LocationService.getSimpleAddress(
         position.latitude,
         position.longitude,
-      );
-
-      final parks = await LocationService.getNearbyParks(
+      ),
+      LocationService.getNearbyParks(
         position.latitude,
         position.longitude,
-      );
-
-      setState(() {
-        locationStatus = address;
-        nearbyParks = parks;
-        isLoading = false;
+      )]).then((results){
+        switch (results){
+          case [String location, List<Park> parkList]:
+            setState(() {
+              locationStatus = location;
+              nearbyParks = parkList;
+              isLoading = false;
+            });
+        }
       });
+
+
     } catch (e) {
       setState(() {
         locationStatus = 'Location unavailable';
@@ -67,9 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,11 +85,12 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
 
             // Explore Nearby Parks section
-            _buildNearbyParksSection(),
+            isLoading ? const Center(child: CircularProgressIndicator()) : _buildNearbyParksSection(),
             const Divider(thickness: 1),
             const SizedBox(height: 20),
 
             // Plan a Picnic section
+            // isLoading ? const Center(child: CircularProgressIndicator()) :
             _buildPicnicSection(),
           ],
         ),
