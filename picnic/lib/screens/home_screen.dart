@@ -1,9 +1,10 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../models/park.dart';
+import '../models/weather.dart';
 import '../services/location_service.dart';
+import '../services/weather_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final User user;
@@ -19,6 +20,9 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   String locationStatus = 'Loading location...';
 
+  Weather? currentWeather;
+  String? weatherError;
+
   @override
   void initState() {
     super.initState();
@@ -26,38 +30,50 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadLocationData() async {
+    setState(() {
+      isLoading = true;
+      locationStatus = 'Loading location...';
+      weatherError = null;
+    });
+
     try {
       final position = await LocationService.getCurrentPosition();
 
+      if (!mounted) return;
+
       if (position == null) {
-        setState(() => locationStatus = 'Location access denied');
+        setState(() {
+          locationStatus = 'Location access denied';
+          isLoading = false;
+          currentWeather = null;
+          weatherError = 'Location unavailable';
+        });
         return;
       }
 
-      Future.wait([
-      LocationService.getSimpleAddress(
-        position.latitude,
-        position.longitude,
-      ),
-      LocationService.getNearbyParks(
-        position.latitude,
-        position.longitude,
-      )]).then((results){
-        switch (results){
-          case [String location, List<Park> parkList]:
-            setState(() {
-              locationStatus = location;
-              nearbyParks = parkList;
-              isLoading = false;
-            });
-        }
+      final lat = position.latitude;
+      final lon = position.longitude;
+
+      final results = await Future.wait([
+        LocationService.getSimpleAddress(lat, lon),
+        LocationService.getNearbyParks(lat, lon),
+        WeatherService.getCurrentWeather(lat, lon),
+      ]);
+
+      setState(() {
+        locationStatus = results[0] as String;
+        nearbyParks = (results[1] as List<Park>);
+        currentWeather = results[2] as Weather?;
+        weatherError = currentWeather == null ? 'Failed to fetch weather' : null;
+        isLoading = false;
       });
-
-
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         locationStatus = 'Location unavailable';
         isLoading = false;
+        currentWeather = null;
+        weatherError = 'Failed to load weather.';
       });
     }
   }
@@ -74,25 +90,97 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Navigation Row
-            _buildNavigationRow(),
-            const Divider(thickness: 1),
-            const SizedBox(height: 20),
+      body: RefreshIndicator(
+        onRefresh: _loadLocationData,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildLocationBanner(),
+              const SizedBox(height: 12),
+              _buildWeatherCard(),
 
-            // Explore Nearby Parks section
-            isLoading ? const Center(child: CircularProgressIndicator()) : _buildNearbyParksSection(),
-            const Divider(thickness: 1),
-            const SizedBox(height: 20),
+              const SizedBox(height: 16),
+              const Divider(thickness: 1),
+              const SizedBox(height: 20),
 
-            // Plan a Picnic section
-            // isLoading ? const Center(child: CircularProgressIndicator()) :
-            _buildPicnicSection(),
-          ],
+              _buildNavigationRow(),
+              const Divider(thickness: 1),
+              const SizedBox(height: 20),
+
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _buildNearbyParksSection(),
+              const Divider(thickness: 1),
+              const SizedBox(height: 20),
+
+              _buildPicnicSection(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocationBanner() {
+    return Card(
+      color: Colors.green.shade50,
+      child: ListTile(
+        leading: const Icon(Icons.my_location, color: Colors.green),
+        title: const Text('Your Location'),
+        subtitle: Text(locationStatus),
+        trailing: IconButton(
+          tooltip: 'Refresh',
+          icon: const Icon(Icons.refresh),
+          onPressed: _loadLocationData,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWeatherCard() {
+    if (isLoading) {
+      return const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 12),
+              Text('Fetching weather...'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (currentWeather == null) {
+      return Card(
+        child: ListTile(
+          leading: const Icon(Icons.cloud_off, color: Colors.grey),
+          title: const Text('Weather unavailable'),
+          subtitle: Text(weatherError ?? 'Try pulling to refresh.'),
+          trailing: IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadLocationData,
+          ),
+        ),
+      );
+    }
+
+    final w = currentWeather!;
+    return Card(
+      child: ListTile(
+        leading: (w.iconUrl != null)
+            ? Image.network(w.iconUrl!, width: 48, height: 48)
+            : const Icon(Icons.wb_sunny, color: Colors.orange, size: 36),
+        title: Text('${w.tempC.toStringAsFixed(0)}°C  •  ${w.description}'),
+        subtitle: Text('H ${w.tempMaxC.toStringAsFixed(0)}°  •  L ${w.tempMinC.toStringAsFixed(0)}°'),
+        trailing: Text(
+          w.city ?? '',
+          style: const TextStyle(fontWeight: FontWeight.w600),
         ),
       ),
     );
